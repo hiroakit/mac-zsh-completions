@@ -26,7 +26,7 @@ _pkgutil() {
 		'--file-info-plist[Show metadata known about PATH in plist format]' \
         '--forget[Discard receipt data for the specified package]' \
         '--learn[Update --edit-pkg PKGID with actual metadata from PATH]' \
- 		'--expand[expand the flat package PKG to DIR]' \
+		'(- *)''--expand[expand the flat package PKG to DIR]:filename:_files' \
  		'--flatten[Flatten the files at DIR as PKG]' \
  		'--bom[Extract any Bom files from the pkg at PATH into /tmp]' \
  		'--payload-files[List the paths archived within the (m)pkg at PATH]' \
