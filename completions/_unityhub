@@ -1,0 +1,101 @@
+#compdef unityhub
+
+#
+# Completion script for Unity Hub CLI
+#
+# ----------------------------------------------------------------------------------
+#
+# Copyright (c) 2021 Hiroaki ENDOH
+#  
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+_commands=(
+	'editor:Show list the releases and installed editors'
+	'help:Show information about commands'
+	'install-path:Show the path where the Unity editors will be installed'
+	'install:Install a new editor either from the releases list or archive'
+	'install-modules:Download and install a module (e.g. build support) to an installed editor'
+)
+
+describe_unityhub_commands() {
+	_describe 'command' _commands
+}
+
+_unityhub_modules() {
+	local -a modules=(
+		'android[Android Build Support]'
+		'ios[iOS Build Support]'
+		'appletv[tvOS Build Support]'
+		'linux-mono[Linux Build Support]'
+		'samsung[SamsungTV Build Support]'
+	)
+	_values -w 'module' $modules
+}
+
+_unityhub_editors() {
+	local -a unity_editors=()
+	unity_editors=(`/Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless editors | awk '{ if (NF == 1) { print $1 } }'`)
+	_values "Unity Editors" $unity_editors
+}
+
+_unityhub() {
+ 	_arguments \
+ 		'1: :describe_unityhub_commands' \
+ 		'*:: :->command_state'
+
+	case $state in
+		command_state)
+			case $words[1] in
+				help)
+					_default
+					;;
+				editors)
+					_default
+					;;
+				install-path)
+					_arguments \
+						'(-s --set)'{-s,--set}'[set the install path to the given path]' \
+						'(-g --get)'{-g,--get}'[returns the install path]'	  
+					;;
+				install)
+ 			   		_arguments \
+						'(-v --version)'{-v,--version}'[editor version to be installed (e.g. 2019.1.11f1)]:groups:->install_version_args' \
+						'(-c --changeset)'{-c,--changeset}'[changeset of the editor if it is not in the release list (e.g. 9b001d489a54)]' \
+						'(-m --module)'{-m,--module}'[the module id]:*:modules:_unityhub_modules'
+ 			  		;;
+				install-modules)
+			   		_arguments \
+						'(-v --version)'{-v,--version}'[version of the editor to add the module]' \
+						'(-cm --childModules)'{-cm,--childModules}'[automatically installs all child modules of selected modules]' \
+						'(-m --module)'{-m,--module}'[the module id]:*:modules:_unityhub_modules'					
+			   		;;
+				*)
+					_default
+					;;
+			esac
+			;;
+	esac
+
+    case $state in
+		install_version_args)
+			_unityhub_editors
+			;;
+	esac
+}
